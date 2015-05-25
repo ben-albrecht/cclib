@@ -40,7 +40,8 @@ def setup_cclib():
         sys.argv.pop(sys.argv.index('egg'))
         from setuptools import setup
 
-    from distutils.core import setup
+    from setuptools import setup
+    #from distutils.core import setup
 
     # The list of packages to be installed.
     cclib_packages = [
@@ -68,8 +69,8 @@ def setup_cclib():
         classifiers = classifiers.split("\n"),
         platforms = ["Any."],
         packages = cclib_packages,
-        package_dir = { 'cclib':'src/cclib' },
-        scripts = ["src/scripts/ccget", "src/scripts/ccwrite", "src/scripts/cda"],
+        package_dir = { 'cclib':'cclib' },
+        scripts = ["scripts/ccget", "scripts/ccwrite", "/scripts/cda"],
     )
 
 

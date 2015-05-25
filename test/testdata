@@ -105,6 +105,7 @@ GeoOpt    ORCA        OrcaGeoOptTest        basicORCA2.9          dvb_gopt.out
 GeoOpt    ORCA        OrcaGeoOptTest        basicORCA3.0          dvb_gopt.out
 GeoOpt    Psi         PsiGeoOptTest         basicPsi4             dvb_gopt_hf.out
 GeoOpt    QChem       GenericGeoOptTest     basicQChem4.2         dvb_gopt.out
+GeoOpt    MOPAC       GenericGeoOptTest     basicMOPAC2012        dvb_gopt.out
 
 MP        DALTON      GenericMP2Test        basicDALTON-2013      water_mp2.out
 MP        DALTON      GenericMP2Test        basicDALTON-2015      water_mp2.out
@@ -173,6 +174,7 @@ SP        Psi         Psi3SPTest            basicPsi3             dvb_sp_hf.out
 SP        Psi         GenericSPTest         basicPsi4             dvb_sp_hf.out
 SP        Psi         GenericSPTest         basicPsi4             dvb_sp_ks.out
 SP        QChem       GenericSPTest         basicQChem4.2         dvb_sp.out
+SP        MOPAC       GenericSPTest         basicMOPAC2012        dvb_sp.out
 
 SPun      ADF         GenericSPunTest       basicADF2007.01       dvb_un_sp.adfout
 SPun      ADF         GenericSPunTest       basicADF2013.01       dvb_un_sp.adfout
@@ -193,6 +195,7 @@ SPun      NWChem      GenericSPunTest       basicNWChem6.5        dvb_un_sp_ks.o
 SPun      ORCA        GenericSPunTest       basicORCA2.9          dvb_sp_un.out
 SPun      ORCA        GenericSPunTest       basicORCA3.0          dvb_sp_un.out
 SPun      QChem       GenericSPunTest       basicQChem4.2         dvb_sp_un.out
+SPun      MOPAC       GenericSPTest         basicMOPAC2012        dvb_sp_un.out
 
 TD        ADF         ADFTDDFTTest          basicADF2007.01       dvb_td.adfout
 TD        ADF         ADFTDDFTTest          basicADF2013.01       dvb_td.adfout
@@ -225,6 +228,7 @@ vib       Molpro      GenericIRTest         basicMolpro2012       dvb_ir.out    
 vib       ORCA        OrcaIRTest            basicORCA2.9          dvb_ir.out
 vib       ORCA        OrcaIRTest            basicORCA3.0          dvb_ir.out
 vib       QChem       QChemIRTest           basicQChem4.2         dvb_ir.out
+GeoOpt    MOPAC       GenericIRTest         basicMOPAC2012        dvb_ir.out
 
 vib       GAMESS      GenericIRimgTest      basicGAMESS-US2012    nh3_ts_ir.out
 

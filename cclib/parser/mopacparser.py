@@ -49,6 +49,10 @@ class MOPAC(logfileparser.Logfile):
         self.unrestricted = False
         self.is_rohf = False
 
+        # Keep track of 1SCF vs. gopt since gopt is default
+        self.onescf = False
+        self.geomdone = False
+
         # Compile the dashes-and-or-spaces-only regex.
         self.re_dashes_and_spaces = re.compile('^[\s-]+$')
 
@@ -58,6 +62,7 @@ class MOPAC(logfileparser.Logfile):
     def after_parsing(self):
         #TODO
 
+        """
         # If parsing a fragment job, each of the geometries appended to
         # `atomcoords` may be of different lengths, which will prevent
         # conversion from a list to NumPy array.
@@ -104,24 +109,34 @@ class MOPAC(logfileparser.Logfile):
                         bfcounts[bfname] = angmom.index(bfname[0])
                     newbfname = '{}{}'.format(bfcounts[bfname], bfname)
                     self.aonames[bfindex] = '_'.join([atomname, newbfname])
+        """
 
     def extract(self, inputfile, line):
-        #TODO
         """Extract information from the file object inputfile."""
-
-        # Strange yet effective way to find input commands
-        if line[0:4] == self.star:
+        if self.stars in line:
             line = inputfile.next()
-            if line == self.stars:
+            if ' *  CALCULATION DONE:' in line:
+
+                # Calculation Information
+                while self.stars not in line:
+                    if 'CHARGE ON SYSTEM =' in line:
+                        charge = int(line.split()[5])
+                        self.set_attribute('charge', charge)
+                    line = inputfile.next()
+
+                    if '1SCF' in line:
+                        self.onescf = True
+
+                # Input Fields
                 #FIXME We assume inputs are not extended past 2 line default
                 line = inputfile.next()
                 inputs = line.split()
                 line = inputfile.next()
                 inputs.extend(line.split())
-                if 'charge' not in inputs:
-                    if not hasattr(self, 'charge'):
-                        self.set_attribute('charge', charge)
-
+                inputs = [x.upper() for x in inputs]
+                if 'CHARGE' not in inputs and not hasattr(self, 'charge'):
+                    charge = 0
+                    self.set_attribute('charge', charge)
 
         """
 
@@ -224,35 +239,45 @@ class MOPAC(logfileparser.Logfile):
                 self.gbasis.append(atom)
                 line = next(inputfile)
 
+        """
+
         # Extract the atomic numbers and coordinates of the atoms.
-        if 'Standard Nuclear Orientation (Angstroms)' in line:
-            if not hasattr(self, 'atomcoords'):
-                self.atomcoords = []
-            self.skip_lines(inputfile, ['cols', 'dashes'])
-            atomelements = []
-            atomcoords = []
-            line = next(inputfile)
-            while list(set(line.strip())) != ['-']:
-                entry = line.split()
-                atomelements.append(entry[1])
-                atomcoords.append(list(map(float, entry[2:])))
+        if not self.geomdone:
+            if 'NUMBER   SYMBOL      (ANGSTROMS)     (ANGSTROMS)     (ANGSTROMS)' in line:
+                if not hasattr(self, 'atomcoords'):
+                    self.atomcoords = []
+
+                if self.onescf:
+                    self.geomdone = True
+
                 line = next(inputfile)
+                line = next(inputfile)
+                atomelements = []
+                atomcoords = []
 
-            self.atomcoords.append(atomcoords)
+                entry = line.split()
+                while entry:
+                   atomelements.append(entry[1])
+                   atomcoords.append(list(map(float, entry[2::2])))
+                   line = next(inputfile)
+                   entry = line.split()
 
-            if not hasattr(self, 'atomnos'):
-                self.atomnos = []
-                self.atomelements = []
-                for atomelement in atomelements:
-                    self.atomelements.append(atomelement)
-                    if atomelement == 'GH':
-                        self.atomnos.append(0)
-                    else:
+                self.atomcoords.append(atomcoords)
+
+
+
+                if not hasattr(self, 'atomnos'):
+                    self.atomnos = []
+                    self.atomelements = []
+                    for atomelement in atomelements:
+                        self.atomelements.append(atomelement)
                         self.atomnos.append(utils.PeriodicTable().number[atomelement])
-                self.natom = len(self.atomnos)
-                self.atommap = self.generate_atom_map()
-                self.formula_histogram = self.generate_formula_histogram()
+                    self.natom = len(self.atomnos)
+                    self.atommap = self.generate_atom_map()
+                    self.formula_histogram = self.generate_formula_histogram()
 
+
+        """
         # Number of electrons.
         # Useful for determining the number of occupied/virtual orbitals.
         if 'Nuclear Repulsion Energy' in line:
@@ -1168,6 +1193,8 @@ class MOPAC(logfileparser.Logfile):
     """
     def parse_charge_section(self, inputfile, chargetype):
         """Parse the population analysis charge block."""
+
+        """
         self.skip_line(inputfile, 'blank')
         line = next(inputfile)
         has_spins = False
@@ -1194,10 +1221,12 @@ class MOPAC(logfileparser.Logfile):
         self.atomcharges[chargetype] = numpy.array(charges)
         if has_spins:
             self.atomspins[chargetype] = numpy.array(spins)
+        """
 
     def parse_matrix(self, inputfile, nparray):
         """MOPAC prints most matrices in a standard format; parse the matrix
         into a preallocated NumPy array of the appropriate shape.
+        """
         """
         nrows, ncols = nparray.shape
         line = next(inputfile)
@@ -1215,6 +1244,7 @@ class MOPAC(logfileparser.Logfile):
                 line = next(inputfile)
                 rowcounter += 1
             colcounter += self.ncolsblock
+        """
 
 
     def parse_matrix_aonames(self, inputfile, nparray):
@@ -1224,6 +1254,7 @@ class MOPAC(logfileparser.Logfile):
         Rather than have one routine for parsing all general matrices
         and the 'MOLECULAR ORBITAL COEFFICIENTS' block, use a second
         which handles `aonames`.
+        """
         """
         bigmom = ('d', 'f', 'g', 'h')
         nrows, ncols = nparray.shape
@@ -1263,6 +1294,7 @@ class MOPAC(logfileparser.Logfile):
                 line = next(inputfile)
                 rowcounter += 1
             colcounter += self.ncolsblock
+        """
 
     def generate_atom_map(self):
         """Generate the map to go from MOPAC atom numbering:
@@ -1272,6 +1304,7 @@ class MOPAC(logfileparser.Logfile):
         for later use.
         """
 
+        """
         # Generate the desired order.
         order_proper = [element + str(num)
                         for element, num in zip(self.atomelements,
@@ -1285,12 +1318,14 @@ class MOPAC(logfileparser.Logfile):
         # Combine the orders into a mapping.
         atommap = {k:v for k, v, in zip(order_mopac, order_proper)}
         return atommap
+        """
 
     def generate_formula_histogram(self):
         """From the atomnos, generate a histogram that represents the
         molecular formula.
         """
 
+        """
         histogram = dict()
         for element in self.atomelements:
             if element in histogram.keys():
@@ -1298,6 +1333,7 @@ class MOPAC(logfileparser.Logfile):
             else:
                 histogram[element] = 1
         return histogram
+        """
 
 
 if __name__ == '__main__':
