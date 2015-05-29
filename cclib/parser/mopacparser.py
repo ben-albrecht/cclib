@@ -44,6 +44,12 @@ class MOPAC(logfileparser.Logfile):
     def before_parsing(self):
         #TODO
 
+        # Defaults
+        charge = 0
+        self.set_attribute('charge', charge)
+        mult = 1
+        self.set_attribute('mult', mult)
+
         # Keep track of whether or not we're performing an
         # (un)restricted calculation.
         self.unrestricted = False
@@ -58,6 +64,16 @@ class MOPAC(logfileparser.Logfile):
 
         self.star = ' * '
         self.stars = ' *******************************************************************************'
+
+        self.spinstate = {'SINGLET': 1,
+                          'DOUBLET': 2,
+                          'TRIPLET': 3,
+                          'QUARTET': 4,
+                          'QUINTET': 5,
+                          'SEXTET': 6,
+                          'HEPTET': 7,
+                          'OCTET': 8,
+                          'NONET': 9}
 
     def after_parsing(self):
         #TODO
@@ -123,6 +139,9 @@ class MOPAC(logfileparser.Logfile):
                         charge = int(line.split()[5])
                         self.set_attribute('charge', charge)
                     line = inputfile.next()
+                    if 'SPIN STATE DEFINED AS A' in line:
+                        mult = self.spinstate(line.split()[1])
+                        self.set_attribute('mult', mult)
 
                     if '1SCF' in line:
                         self.onescf = True
@@ -134,9 +153,6 @@ class MOPAC(logfileparser.Logfile):
                 line = inputfile.next()
                 inputs.extend(line.split())
                 inputs = [x.upper() for x in inputs]
-                if 'CHARGE' not in inputs and not hasattr(self, 'charge'):
-                    charge = 0
-                    self.set_attribute('charge', charge)
 
         """
 

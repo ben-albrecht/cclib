@@ -201,6 +201,10 @@ class MolproGeoOptTest(GenericGeoOptTest):
         converged = (value_e < target_e and value_g < target_g) or (value_g < target_g and value_s < target_s)
         self.assertTrue(converged)
 
+class MOPACGeoOptTest(GenericGeoOptTest):
+    """Customized geometry optimization unittest"""
+
+
 class NWChemGeoOptTest(GenericGeoOptTest):
     """Customized restricted single point HF unittest"""
 

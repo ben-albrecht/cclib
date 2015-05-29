@@ -70,7 +70,7 @@ def setup_cclib():
         platforms = ["Any."],
         packages = cclib_packages,
         package_dir = { 'cclib':'cclib' },
-        scripts = ["scripts/ccget", "scripts/ccwrite", "/scripts/cda"],
+        scripts = ["scripts/ccget", "scripts/ccwrite", "scripts/cda"],
     )
 
 
